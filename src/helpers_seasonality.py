@@ -6,6 +6,8 @@ import pandas_datareader.data as pdr
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+def prova():
+  return "helllo world!!!"
 
 ticker = "AAPL"
 
