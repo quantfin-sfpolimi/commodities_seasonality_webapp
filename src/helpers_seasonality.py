@@ -37,6 +37,32 @@ def download_data(start, end, ticker):
 
   return data
 
+def calculate_seasonality_mean(start, end, ticker):
+  data = download_data(start, end, ticker)
+
+  #anno bisestile
+  first_day = dt.datetime(2016,1,1)
+  last_day = dt.datetime(2016,12,31)
+
+  one_year_series = pd.date_range(start=first_day, end=last_day, freq="D")
+
+  years = data["Year"].unique()
+  df_seasonality = pd.DataFrame(index = one_year_series, columns=years)
+  df_seasonality.index = df_seasonality.index.strftime("%m-%d")
+
+  for year in years:
+    data_year = data[data["Year"] == year]
+
+    data_year.index = data_year.index.strftime("%m-%d")
+
+    initial_year_price = data_year.at["01-01", "Adj Close"]
+    data_year["Adj Close"] = ((data_year["Adj Close"] - initial_year_price)/ initial_year_price) * 100
+    df_seasonality[year] = data_year["Adj Close"]
+
+  df_seasonality.bfill(inplace = True)
+  df_seasonality = df_seasonality.mean(axis = 1)
+  return df_seasonality
+
 def calculate_seasonality(start, end, ticker):
   data = download_data(start, end, ticker)
 
@@ -63,6 +89,7 @@ def calculate_seasonality(start, end, ticker):
   return df_seasonality
 
 
+
 def volume_seasonality(start, end, ticker):
   data = download_data(start, end, ticker)
 
@@ -78,3 +105,6 @@ def volume_seasonality(start, end, ticker):
     volume_df[year] = data_year["Volume"].groupby(data_year.index.month).sum()
 
   return volume_df
+
+
+print(calculate_seasonality_mean(start, end, "AAPL"))
