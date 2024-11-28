@@ -16,6 +16,15 @@ templates = Jinja2Templates(directory="templates")
 default_start = 2012
 default_end = 2022
 
+@app.get("/educational")
+async def landing(request: Request):
+    """
+    Renders the landing page, redirecting you to landing.html.
+    """
+    context = {}
+    return templates.TemplateResponse(name="educational.html", request=request, context=context)
+
+
 @app.get("/")
 async def landing(request: Request):
     """
@@ -89,10 +98,3 @@ async def get_monthly_returns(ticker: str, start: int=default_start, end: int=de
     data = volume_seasonality(start, end, ticker)
     return {data.to_json()}
 
-@app.get("/educational")
-async def landing(request: Request):
-    """
-    Renders the landing page, redirecting you to landing.html.
-    """
-    context = {}
-    return templates.TemplateResponse(name="educational.html", request=request, context=context)
