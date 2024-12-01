@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.gzip import GZipMiddleware
 from helpers_seasonality import *
 import datetime as dt
+import json
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -13,8 +14,8 @@ app.add_middleware(GZipMiddleware)
 templates = Jinja2Templates(directory="templates")
 
 
-default_start = 2012
-default_end = 2022
+default_start = 2022
+default_end = 2024
 
 @app.get("/educational")
 async def landing(request: Request):
@@ -75,8 +76,10 @@ async def get_seasonality(ticker: str, start: int=default_start, end: int=defaul
     
    
     
-    data = calculate_seasonality(start, end, ticker)
-    return {data.to_json()}
+    data = calculate_seasonality_mean(start, end, ticker)
+    
+    
+    return data
 
 
 @app.get('/volume/{ticker}/')

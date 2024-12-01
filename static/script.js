@@ -8,7 +8,7 @@ async function seasonality(ticker){
         response.json()
     );
 
-    console.log(data_seasonality[0])
+    console.log(data_seasonality)
 }
 
 window.onload = function load() {

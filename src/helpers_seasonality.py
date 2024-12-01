@@ -5,6 +5,7 @@ import datetime as dt
 import pandas_datareader.data as pdr
 import seaborn as sns
 import matplotlib.pyplot as plt
+import json
 
 def prova():
   return "helllo world!!!"
@@ -60,8 +61,18 @@ def calculate_seasonality_mean(start, end, ticker):
     df_seasonality[year] = data_year["Adj Close"]
 
   df_seasonality.bfill(inplace = True)
-  df_seasonality = df_seasonality.mean(axis = 1)
-  return df_seasonality
+  df_seasonality["mean"] = df_seasonality.mean(axis = 1)
+  
+  df_seasonality_mean = pd.DataFrame(index = df_seasonality.index)
+  df_seasonality_mean["mean"] = df_seasonality["mean"]
+  
+  data = []
+  for index, row in df_seasonality_mean.iterrows():
+    data.append({"date" : index, "index": row["mean"]  })
+    
+  data_json = json.dumps(data)
+  print(type(data_json))
+  return data_json
 
 def calculate_seasonality(start, end, ticker):
   data = download_data(start, end, ticker)
@@ -86,6 +97,8 @@ def calculate_seasonality(start, end, ticker):
     df_seasonality[year] = data_year["Adj Close"]
 
   df_seasonality.bfill(inplace = True)
+  
+  
   return df_seasonality
 
 
@@ -107,4 +120,4 @@ def volume_seasonality(start, end, ticker):
   return volume_df
 
 
-print(calculate_seasonality_mean(start, end, "AAPL"))
+calculate_seasonality_mean(start, end, "AAPL")
