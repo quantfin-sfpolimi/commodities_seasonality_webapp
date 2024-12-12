@@ -1,63 +1,86 @@
 'use client';
 
-import { addDays, format } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import * as React from 'react';
-import { DateRange } from 'react-day-picker';
-
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import * as React from 'react';
 
 export function DatePickerWithRange({
 	className,
 }: React.HTMLAttributes<HTMLDivElement>) {
-	const [date, setDate] = React.useState<DateRange | undefined>({
-		from: new Date(2024, 10, 20),
-		to: addDays(new Date(2024, 10, 20), 20),
+	const currentYear = new Date().getFullYear();
+	const [yearRange, setYearRange] = React.useState<
+		{ from: number; to: number | null } | undefined
+	>({
+		from: currentYear - 1,
+		to: currentYear,
 	});
+
+	const handleYearClick = (year: number) => {
+		if (!yearRange || (yearRange && yearRange.to)) {
+			setYearRange({ from: year, to: null });
+		} else {
+			setYearRange((prev) =>
+				prev?.from && year >= prev.from ? { from: prev.from, to: year } : prev
+			);
+		}
+	};
+
+	const renderYears = () => {
+		const years = Array.from({ length: 20 }, (_, i) => currentYear - 19 + i);
+		return (
+			<div className="grid grid-cols-4 gap-2 p-4">
+				{years.map((year) => (
+					<button
+						key={year}
+						className={cn(
+							'px-3 py-2 rounded-md text-sm font-medium',
+							yearRange?.from === year || yearRange?.to === year
+								? 'bg-blue-500 text-white'
+								: 'bg-gray-200 hover:bg-gray-300'
+						)}
+						onClick={() => handleYearClick(year)}
+					>
+						{year}
+					</button>
+				))}
+			</div>
+		);
+	};
 
 	return (
 		<div className={cn('grid gap-2', className)}>
 			<Popover>
 				<PopoverTrigger asChild>
 					<Button
-						id="date"
+						id="year-range"
 						variant={'outline'}
 						className={cn(
 							'w-[300px] justify-start text-left font-normal',
-							!date && 'text-muted-foreground'
+							!yearRange && 'text-muted-foreground'
 						)}
 					>
 						<CalendarIcon />
-						{date?.from ? (
-							date.to ? (
+						{yearRange?.from ? (
+							yearRange.to ? (
 								<>
-									{format(date.from, 'LLL dd, y')} -{' '}
-									{format(date.to, 'LLL dd, y')}
+									{yearRange.from} - {yearRange.to}
 								</>
 							) : (
-								format(date.from, 'LLL dd, y')
+								yearRange.from
 							)
 						) : (
-							<span>Pick a date</span>
+							<span>Pick a year range</span>
 						)}
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent className="w-auto p-0" align="start">
-					<Calendar
-						initialFocus
-						mode="range"
-						defaultMonth={date?.from}
-						selected={date}
-						onSelect={setDate}
-						numberOfMonths={2}
-					/>
+					{renderYears()}
 				</PopoverContent>
 			</Popover>
 		</div>
