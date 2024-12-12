@@ -51,7 +51,7 @@ export function AssetSelectorForm() {
 	};
 
 	const renderYears = () => {
-		const years = Array.from({ length: 20 }, (_, i) => currentYear - 10 + i);
+		const years = Array.from({ length: 20 }, (_, i) => currentYear - 19 + i);
 		return (
 			<div className="grid grid-cols-4 gap-2 p-4">
 				{years.map((year) => (
