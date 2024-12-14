@@ -1,12 +1,3 @@
-""""
-line charts:
-- una per la seasonality
-- 5 per i 5 anni più recenti
-
-bar charts
-- un grafico per i volumi mensili
-"""
-
 from fastapi import FastAPI, Path, Request
 
 from pydantic import BaseModel
@@ -41,16 +32,14 @@ async def get_seasonality(ticker: str, start=default_start, end=default_end):
     Returns:
     dict: The seasonality data in JSON format.
     """
-
-    #now it returns just pandas dataframe, to be fixed!!!
     print(type(start), end)
     
-    start = str(start)+"01-01"
-    end = str(end)+"01-01"
+    start = str(start)+"-01-01"
+    end = str(end)+"-01-01"
     print(start, end, type(start), type(end))
     
     data = calculate_seasonality_mean(start, end, ticker)    
-    
+    print(type(data))
     return data
 
 

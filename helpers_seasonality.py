@@ -14,16 +14,14 @@ MY_API_TOKEN = '6745b60c312393.05824841'
 SYMBOL_NAME = 'AAPL'
 EXCHANGE_CODE = 'US'
 
-url = f'https://eodhd.com/api/eod/{SYMBOL_NAME}.{EXCHANGE_CODE}?api_token={MY_API_TOKEN}&fmt=json'
-useful_data = requests.get(url).json()
-
-
 ticker = "AAPL"
 
 start = "2020-01-01"
 end = "2022-01-01"
 
 def fetch_stock_data(ticker, start_date, end_date, skip_years=[], frequency='d', exchange_code='US'):
+
+    
     """
     Fetch stock data for a given symbol and time range, skipping specified years.
 
@@ -61,13 +59,16 @@ def fetch_stock_data(ticker, start_date, end_date, skip_years=[], frequency='d',
     # Rename columns
     df = df.rename(columns={'adjusted_close': 'Adj Close', 'volume': 'Volume', 'date': 'Year'})
 
+
     # Select specific columns
-    #df = df[['Year', 'Adj Close', 'Volume']]
-    print("sto stampando")
+    df = df[['Year', 'Adj Close', 'Volume']]
     print(df.columns)
+    #print("sto stampando")
+    #print(df.columns)
 
     # Convert 'Year' column to datetime
-    #df['Year'] = pd.to_datetime(df['Year'])
+    df['Year'] = pd.to_datetime(df['Year'])
+
 
     # Set 'Year' as the index
     df = df.set_index('Year')
@@ -76,12 +77,13 @@ def fetch_stock_data(ticker, start_date, end_date, skip_years=[], frequency='d',
     # Filter out rows with years in the skip_years list
     df = df[~df.index.year.isin(skip_years)]
     
+    
     df_stock = pd.DataFrame(index = df.index.strftime("%Y-%m-%d"))
     df_stock["Adj Close"] = df["Adj Close"]
     df_stock["Volume"] = df["Volume"]
     df_stock["Year"] = df.index.year
     
-    date_range = pd.date_range(start=start, end=end, freq="D")
+    date_range = pd.date_range(start=start_date, end=end_date, freq="D")
 
     data = pd.DataFrame(index=date_range)
 
@@ -203,5 +205,4 @@ def volume_seasonality(start, end, ticker):
 
   return volume_df
 
-print(start, end, type(start), type(end))
-print(calculate_seasonality_mean(start, end, ticker))
+calculate_seasonality_mean(start,end, ticker)
