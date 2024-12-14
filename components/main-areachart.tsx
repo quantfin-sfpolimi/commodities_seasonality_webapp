@@ -5,6 +5,8 @@ import {useState,useEffect} from 'react';
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
+
+
 import {
 	Card,
 	CardContent,
@@ -45,6 +47,7 @@ const chartConfig = {
 
 export function MainChart() {
 	let seasonality_url = "http://127.0.0.1:8000/get-seasonality/"
+	
 	const ticker = "AAPL"
 
 	let url = seasonality_url + ticker

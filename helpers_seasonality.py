@@ -6,14 +6,96 @@ import pandas_datareader.data as pdr
 import seaborn as sns
 import matplotlib.pyplot as plt
 import json
+import requests
+import warnings
+warnings.filterwarnings('ignore')
 
-def prova():
-  return "helllo world!!!"
+MY_API_TOKEN = '6745b60c312393.05824841'
+SYMBOL_NAME = 'AAPL'
+EXCHANGE_CODE = 'US'
+
+url = f'https://eodhd.com/api/eod/{SYMBOL_NAME}.{EXCHANGE_CODE}?api_token={MY_API_TOKEN}&fmt=json'
+useful_data = requests.get(url).json()
+
 
 ticker = "AAPL"
 
-start = dt.datetime(2020,1,1)
-end = dt.datetime.now()
+start = "2020-01-01"
+end = "2022-01-01"
+
+def fetch_stock_data(ticker, start_date, end_date, skip_years=[], frequency='d', exchange_code='US'):
+    """
+    Fetch stock data for a given symbol and time range, skipping specified years.
+
+    Parameters:
+        ticker (str): The stock symbol (e.g., 'AAPL').
+        exchange_code (str): The exchange code (e.g., 'US').
+        start_date (str): Start date in 'YYYY-MM-DD' format.
+        end_date (str): End date in 'YYYY-MM-DD' format.
+        skip_years (list): List of years to exclude from the result.
+        frequency (str): Data frequency ('d' for daily, 'w' for weekly, 'm' for monthly). Default is 'd'.
+
+    Returns:
+        pd.DataFrame: Processed DataFrame with selected columns and filtered rows. The index is set to 'Year'.
+    """
+    # Define API token
+    API_TOKEN = '6745b60c312393.05824841'
+
+    # Construct API URL
+    url = (f'https://eodhd.com/api/eod/{ticker}.{exchange_code}'
+           f'?from={start_date}&to={end_date}&period={frequency}&api_token={API_TOKEN}&fmt=json')
+
+    # Fetch data from the API
+    response = requests.get(url)
+
+    # Check for request errors
+    if response.status_code != 200:
+        raise ValueError(f"Error fetching data: {response.status_code}, {response.text}")
+
+    # Parse JSON response
+    useful_data = response.json()
+
+    # Convert to DataFrame
+    df = pd.DataFrame(useful_data)
+
+    # Rename columns
+    df = df.rename(columns={'adjusted_close': 'Adj Close', 'volume': 'Volume', 'date': 'Year'})
+
+    # Select specific columns
+    #df = df[['Year', 'Adj Close', 'Volume']]
+    print("sto stampando")
+    print(df.columns)
+
+    # Convert 'Year' column to datetime
+    #df['Year'] = pd.to_datetime(df['Year'])
+
+    # Set 'Year' as the index
+    df = df.set_index('Year')
+    df = df.set_index(pd.to_datetime(df.index))
+
+    # Filter out rows with years in the skip_years list
+    df = df[~df.index.year.isin(skip_years)]
+    
+    df_stock = pd.DataFrame(index = df.index.strftime("%Y-%m-%d"))
+    df_stock["Adj Close"] = df["Adj Close"]
+    df_stock["Volume"] = df["Volume"]
+    df_stock["Year"] = df.index.year
+    
+    date_range = pd.date_range(start=start, end=end, freq="D")
+
+    data = pd.DataFrame(index=date_range)
+
+
+
+    data["Adj Close"] = df["Adj Close"]
+    data["Volume"] = df["Volume"]
+    data.bfill(inplace=True)
+    data.index = pd.to_datetime(data.index)
+    data["Year"] = data.index.year
+
+    return data
+
+
 
 def download_data(start, end, ticker):
   date_range = pd.date_range(start=start, end=end, freq="D")
@@ -39,7 +121,8 @@ def download_data(start, end, ticker):
   return data
 
 def calculate_seasonality_mean(start, end, ticker):
-  data = download_data(start, end, ticker)
+  data = fetch_stock_data(ticker, start, end)
+
 
   #anno bisestile
   first_day = dt.datetime(2016,1,1)
@@ -61,7 +144,7 @@ def calculate_seasonality_mean(start, end, ticker):
     df_seasonality[year] = data_year["Adj Close"]
 
   df_seasonality.bfill(inplace = True)
-  df_seasonality["mean"] = df_seasonality.mean(axis = 1)
+  df_seasonality["mean"] = df_seasonality.mean(axis = 1, numeric_only=True)
   
   df_seasonality_mean = pd.DataFrame(index = df_seasonality.index)
   df_seasonality_mean["mean"] = df_seasonality["mean"]
@@ -120,5 +203,5 @@ def volume_seasonality(start, end, ticker):
 
   return volume_df
 
-
-calculate_seasonality_mean(start, end, "AAPL")
+print(start, end, type(start), type(end))
+print(calculate_seasonality_mean(start, end, ticker))
