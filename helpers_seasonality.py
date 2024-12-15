@@ -10,7 +10,16 @@ import requests
 import warnings
 warnings.filterwarnings('ignore')
 
-MY_API_TOKEN = '6745b60c312393.05824841'
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+
+
+
+
+
+MY_API_TOKEN = os.getenv("API_KEY")
 SYMBOL_NAME = 'AAPL'
 EXCHANGE_CODE = 'US'
 
