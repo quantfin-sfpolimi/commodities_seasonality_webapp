@@ -1,6 +1,6 @@
 import yfinance as yf
 import pandas as pd
-import numpy
+import numpy 
 import datetime as dt
 import pandas_datareader.data as pdr
 import seaborn as sns
@@ -14,22 +14,18 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-
-
-
-
-
 MY_API_TOKEN = os.getenv("API_KEY")
+
+print(MY_API_TOKEN)
 SYMBOL_NAME = 'AAPL'
 EXCHANGE_CODE = 'US'
 
 ticker = "AAPL"
 
-start = "2020-01-01"
-end = "2022-01-01"
+start = "2018-01-01"
+end = "2023-01-01"
 
 def fetch_stock_data(ticker, start_date, end_date, skip_years=[], frequency='d', exchange_code='US'):
-
     
     """
     Fetch stock data for a given symbol and time range, skipping specified years.
@@ -46,7 +42,7 @@ def fetch_stock_data(ticker, start_date, end_date, skip_years=[], frequency='d',
         pd.DataFrame: Processed DataFrame with selected columns and filtered rows. The index is set to 'Year'.
     """
     # Define API token
-    API_TOKEN = '6745b60c312393.05824841'
+    API_TOKEN = MY_API_TOKEN
 
     # Construct API URL
     url = (f'https://eodhd.com/api/eod/{ticker}.{exchange_code}'
@@ -96,8 +92,6 @@ def fetch_stock_data(ticker, start_date, end_date, skip_years=[], frequency='d',
 
     data = pd.DataFrame(index=date_range)
 
-
-
     data["Adj Close"] = df["Adj Close"]
     data["Volume"] = df["Volume"]
     data.bfill(inplace=True)
@@ -134,7 +128,6 @@ def download_data(start, end, ticker):
 def calculate_seasonality_mean(start, end, ticker):
   data = fetch_stock_data(ticker, start, end)
 
-
   #anno bisestile
   first_day = dt.datetime(2016,1,1)
   last_day = dt.datetime(2016,12,31)
@@ -161,6 +154,7 @@ def calculate_seasonality_mean(start, end, ticker):
   df_seasonality_mean["mean"] = df_seasonality["mean"]
   
   data = []
+  
   for index, row in df_seasonality_mean.iterrows():
     temp_dict = {}
     temp_dict["date"] = "2024-"+index
@@ -203,7 +197,6 @@ def volume_seasonality(start, end, ticker):
 
   years = data["Year"].unique()
 
-
   month_range = numpy.arange(1,13,1)
 
   volume_df = pd.DataFrame(index=month_range, columns=years)
@@ -212,6 +205,80 @@ def volume_seasonality(start, end, ticker):
     data_year = data[data["Year"] == year]
     volume_df[year] = data_year["Volume"].groupby(data_year.index.month).sum()
 
-  return volume_df
+    initial_volume = volume_df.at[1, year]
+    volume_df[year] = ((volume_df[year] / initial_volume))
+  
+  volume_df["mean"] = volume_df.mean(axis = 1, numeric_only=True)
+  
+  data = []
+  for index, row in volume_df.iterrows():
+    temp_dict = {}
+    temp_dict["date"] = "2024-"+str(index)
+    temp_dict["volume"] = row["mean"]
+    
+    data.append(temp_dict)
+  
+  return data
+#------------------------------------------------------------
 
-calculate_seasonality_mean(start,end, ticker)
+def prova(start, end, ticker):
+  data = fetch_stock_data(ticker, start, end)
+
+
+  #anno bisestile
+  first_day = dt.datetime(2016,1,1)
+  last_day = dt.datetime(2016,12,31)
+
+  one_year_series = pd.date_range(start=first_day, end=last_day, freq="D")
+
+  years = data["Year"].unique()
+  df_seasonality = pd.DataFrame(index = one_year_series, columns=years)
+  df_seasonality.index = df_seasonality.index.strftime("%m-%d")
+
+  for year in years:
+    data_year = data[data["Year"] == year]
+
+    data_year.index = data_year.index.strftime("%m-%d")
+
+    initial_year_price = data_year.at["01-01", "Adj Close"]
+    data_year["Adj Close"] = ((data_year["Adj Close"] - initial_year_price)/ initial_year_price) * 100
+    df_seasonality[year] = data_year["Adj Close"]
+
+  df_seasonality.bfill(inplace = True)
+  df_seasonality["mean"] = df_seasonality.mean(axis = 1, numeric_only=True)
+  
+  df_seasonality_mean = pd.DataFrame(index = df_seasonality.index)
+  df_seasonality_mean["mean"] = df_seasonality["mean"]
+  
+  data = []
+  
+  df_single_years = calculate_seasonality(start, end, ticker)
+  df_single_years["mean"] = df_seasonality_mean["mean"]
+  years = df_single_years.columns.to_list()
+  years.remove("mean")
+  
+  print(df_single_years)
+  
+  for index, row in df_single_years.iterrows():
+    temp_dict = {}
+    temp_dict["date"] = "2024-"+index
+    temp_dict["seasonality"] = row["mean"]
+    
+    
+    for i in range(5):
+      
+      try:
+        print(years[i])
+        if row[years[i]] == row[years[i]]:
+          
+          temp_dict[i+1] = row[years[i]]
+        else:
+          temp_dict[i+1] = 0
+      except:
+        temp_dict[i+1] = 0
+    data.append(temp_dict)
+  
+  return data
+
+
+print(volume_seasonality(start, end, ticker))

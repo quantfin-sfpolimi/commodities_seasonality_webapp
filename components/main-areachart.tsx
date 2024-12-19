@@ -3,9 +3,15 @@
 import * as React from 'react';
 import {useState,useEffect} from 'react';
 
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart, Line } from 'recharts';
+import { Tooltip, Legend } from 'recharts';
 
 
+const data = [
+	{ name: '2024-01-01', seasonality: 4000, 1: 2400, 2: 2400, 3: 100, 4 : 100, 5 : 100, volume : 50 },
+	{ name: '2024-01-01', seasonality: 5000, 1: 2600, 2: 2100, 3: 30, 4: 800, 5: 90, volume: 10 },
+
+  ];
 
 import {
 	Card,
@@ -46,34 +52,53 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function MainChart() {
-	let seasonality_url = "http://127.0.0.1:8000/get-seasonality/"
+	
+	let seasonality_base = "http://127.0.0.1:8000/get-seasonality/"
 	
 	const ticker = "AAPL"
 
-	let url = seasonality_url + ticker
-	console.log(url)
+	let seasonality_url = seasonality_base + ticker
+	console.log(seasonality_url)
 
-		const [chartData,setData]=useState([]);
-		const getData=()=>{
-			fetch(url,
+		const [seasonality_data,setData1]=useState([]);
+		const getData1=()=>{
+			fetch(seasonality_url,
 			)
 			.then(function(response){
 				return response.json();
 			})
 			.then(function(myJson) {
-				setData(myJson)
+				setData1(myJson)
 			});
 		}
 		useEffect(()=>{
-			getData()
+			getData1()
 		},[])
 
-	console.log((chartData))
+		let volume_base = "http://127.0.0.1:8000/volume/"
+		
+		let volume_url = volume_base + ticker
+
+			const [volume_data,setData2]=useState([]);
+			const getData2=()=>{
+				fetch(volume_url,
+				)
+				.then(function(response){
+					return response.json();
+				})
+				.then(function(myJson) {
+					setData2(myJson)
+				});
+			}
+			useEffect(()=>{
+				getData2()
+			},[])
+	
 
 	//------------------------------------------------------
 	const [timeRange, setTimeRange] = React.useState('90d');
 
-	const filteredData = chartData.filter((item) => {
+	const seasonality = seasonality_data.filter((item) => {
 		const date = new Date(item.date);
 		const referenceDate = new Date('2024-06-30');
 		let daysToSubtract = 90;
@@ -87,6 +112,20 @@ export function MainChart() {
 		return date >= startDate;
 	});
 
+	const volume = volume_data.filter((item) => {
+		const date = new Date(item.date);
+		const referenceDate = new Date('2024-06-30');
+		let daysToSubtract = 90;
+		if (timeRange === '30d') {
+			daysToSubtract = 30;
+		} else if (timeRange === '7d') {
+			daysToSubtract = 7;
+		}
+		const startDate = new Date(referenceDate);
+		startDate.setDate(startDate.getDate() - daysToSubtract);
+		return date >= startDate;
+	});
+	
 	return (
 		<Card>
 			<CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
@@ -94,57 +133,16 @@ export function MainChart() {
 					<CardTitle>Seasonality Chart</CardTitle>
 					<CardDescription></CardDescription>
 				</div>
-				<Select value={timeRange} onValueChange={setTimeRange}>
-					<SelectTrigger
-						className="w-[160px] rounded-lg sm:ml-auto"
-						aria-label="Select a value"
-					>
-						<SelectValue placeholder="Last 3 months" />
-					</SelectTrigger>
-					<SelectContent className="rounded-xl">
-						<SelectItem value="90d" className="rounded-lg">
-							Last 3 months
-						</SelectItem>
-						<SelectItem value="30d" className="rounded-lg">
-							Last 30 days
-						</SelectItem>
-						<SelectItem value="7d" className="rounded-lg">
-							Last 7 days
-						</SelectItem>
-					</SelectContent>
-				</Select>
+			
 			</CardHeader>
 			<CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
 				<ChartContainer
 					config={chartConfig}
-					className="aspect-auto h-[250px] w-full"
+					className="aspect-auto h-[300px] w-full"
 				>
-					<AreaChart data={filteredData}>
+					<AreaChart data={seasonality}>
 						<defs>
-							<linearGradient id="fillX" x1="0" y1="0" x2="0" y2="1">
-								<stop
-									offset="5%"
-									stopColor="var(--color-x)"
-									stopOpacity={0.8}
-								/>
-								<stop
-									offset="95%"
-									stopColor="var(--color-x)"
-									stopOpacity={0.1}
-								/>
-							</linearGradient>
-							<linearGradient id="fillY" x1="0" y1="0" x2="0" y2="1">
-								<stop
-									offset="5%"
-									stopColor="var(--color-y)"
-									stopOpacity={0.8}
-								/>
-								<stop
-									offset="95%"
-									stopColor="var(--color-y)"
-									stopOpacity={0.1}
-								/>
-							</linearGradient>
+							
 						</defs>
 						<CartesianGrid vertical={false} strokeDasharray="3 3" />
 						<XAxis
@@ -163,8 +161,7 @@ export function MainChart() {
 						<YAxis
 							tickLine={false}
 							axisLine={false}
-							tickFormatter={(value) => `$${value}`}
-							domain={[-15, 15]}
+							domain={[-2, 15]}
 						/>
 						<ChartTooltip
 							cursor={{ strokeDasharray: '3 3' }}
@@ -180,22 +177,61 @@ export function MainChart() {
 								/>
 							}
 						/>
-						<Area
-							dataKey="y"
-							type="natural"
-							fill="url(#fillY)"
-							stroke="var(--color-y)"
-							stackId="a"
-						/>
-						<Area
-							dataKey="x"
-							type="natural"
-							fill="url(#fillX)"
-							stroke="var(--color-x)"
-							stackId="a"
-						/>
+						<Area type="monotone" dataKey="seasonality" stroke="#8884d8" fill="#8884d8" strokeWidth={5} />
+						<Area type="monotone" dataKey="1" stroke="#82ca9d" strokeWidth={1} fill="FFFFFF/" fillOpacity={0}/>
+						<Area type="monotone" dataKey="2" stroke="#ffc658" strokeWidth={1} fill="FFFFFF/" fillOpacity={0}/>
+						<Area type="monotone" dataKey="3" stroke="#ff7300" strokeWidth={1} fill="FFFFFF/" fillOpacity={0}/>
+						<Area type="monotone" dataKey="4" stroke="#387908" strokeWidth={1} fill="FFFFFF/" fillOpacity={0}/>
+						<Area type="monotone" dataKey="5" stroke="#ff0000" strokeWidth={1} fill="FFFFFF/" fillOpacity={0}/>
+						
 						<ChartLegend content={<ChartLegendContent />} />
 					</AreaChart>
+					</ChartContainer>
+					<ChartContainer
+					config={chartConfig}
+					className="aspect-auto h-[300px] w-full"
+				>
+					<BarChart width={500} height={400} data={volume}>
+
+					<defs>
+							
+							</defs>
+							<CartesianGrid vertical={false} strokeDasharray="3 3" />
+							<XAxis
+								dataKey="date"
+								tickLine={false}
+								axisLine={false}
+								tickMargin={8}
+								minTickGap={32}
+								tickFormatter={(value) => {
+									const date = new Date(value);
+									return date.toLocaleDateString('en-US', {
+										month: 'short',
+									});
+								}}
+							/>
+							<YAxis
+								tickLine={false}
+								axisLine={false}
+								domain={[0, 1]}
+							/>
+							<ChartTooltip
+								cursor={{ strokeDasharray: '3 3' }}
+								content={
+									<ChartTooltipContent
+										labelFormatter={(value) => {
+											return new Date(value).toLocaleDateString('en-US', {
+												month: 'short',
+												day: 'numeric',
+											});
+										}}
+										indicator="dot"
+									/>
+								}
+							/>
+								<Bar dataKey="volume" fill="#8884d8" />
+						</BarChart>
+						
 				</ChartContainer>
 			</CardContent>
 		</Card>

@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Path, Request
-
 from pydantic import BaseModel
 from typing import Optional
 from fastapi.templating import Jinja2Templates
@@ -9,14 +8,21 @@ from helpers_seasonality import *
 import datetime as dt
 import json
 
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+MY_API_TOKEN = os.getenv("API_KEY")
+print("ciao")
+print(MY_API_TOKEN)
 
 app = FastAPI()
 app.add_middleware(GZipMiddleware)
 
 
-default_start = 2020
-default_end = 2021
+default_start = 2018
+default_end = 2022
 
 @app.get('/get-seasonality/{ticker}/')
 async def get_seasonality(ticker: str, start=default_start, end=default_end):
@@ -38,8 +44,22 @@ async def get_seasonality(ticker: str, start=default_start, end=default_end):
     end = str(end)+"-01-01"
     print(start, end, type(start), type(end))
     
-    data = calculate_seasonality_mean(start, end, ticker)    
+    data = prova(start, end, ticker)    
     print(type(data))
+    return data
+
+@app.get('/volume/{ticker}/')
+async def get_seasonality(ticker: str, start=default_start, end=default_end):
+    
+    print(type(start), end)
+    
+    start = str(start)+"-01-01"
+    end = str(end)+"-01-01"
+    print(start, end, type(start), type(end))
+    
+    data = volume_seasonality(start, end, ticker)    
+    
+    
     return data
 
 
