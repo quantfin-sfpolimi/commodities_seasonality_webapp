@@ -5,6 +5,8 @@ import {useState,useEffect} from 'react';
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart, Line } from 'recharts';
 import { Tooltip, Legend } from 'recharts';
+import {AssetSelectorForm} from '@/components/main-selector';
+
 
 
 const data = [
