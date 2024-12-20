@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 MY_API_TOKEN = os.getenv("API_KEY")
+EXCHANGE_CODE = 'US'
 print("ciao")
 print(MY_API_TOKEN)
 
@@ -70,3 +71,18 @@ async def landing(request: Request):
     """
     return "hello"
 
+@app.get("/ticker-list")
+async def get_ticker_list():
+    
+    url = f'https://eodhd.com/api/exchange-symbol-list/NASDAQ?api_token={MY_API_TOKEN}&fmt=json&type=preferred_stock'
+    data = requests.get(url).json()
+    get_ticker_list = []
+    for ticker in data: 
+        print(ticker)
+        temp = dict()
+        temp['value'] = ticker['Code']
+        temp['label'] = ticker['Name']
+        get_ticker_list.append(temp)
+    return get_ticker_list
+
+print(prova("2023-01-01", "2024-01-01", "AAPL"))

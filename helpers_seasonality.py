@@ -262,7 +262,10 @@ def prova(start, end, ticker):
   for index, row in df_single_years.iterrows():
     temp_dict = {}
     temp_dict["date"] = "2024-"+index
-    temp_dict["seasonality"] = row["mean"]
+    if row["mean"] == row["mean"]:
+      temp_dict["seasonality"] = row["mean"]
+    else:
+      temp_dict["seasonality"] = 0
     
     
     for i in range(5):

@@ -7,11 +7,6 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart, Line } fro
 import { Tooltip, Legend } from 'recharts';
 import {AssetSelectorForm} from '@/components/main-selector';
 
-const data = [
-	{ name: '2024-01-01', seasonality: 4000, 1: 2400, 2: 2400, 3: 100, 4 : 100, 5 : 100, volume : 50 },
-	{ name: '2024-01-01', seasonality: 5000, 1: 2600, 2: 2100, 3: 30, 4: 800, 5: 90, volume: 10 },
-
-  ];
 
 import {
 	Card,
@@ -51,7 +46,7 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-export function MainChart({ticker,start_year, end_year}) {
+export function MainChart({ticker, start_year, end_year}) {
 
 	if(ticker == ""){
 		ticker = "AAPL"
@@ -62,11 +57,8 @@ export function MainChart({ticker,start_year, end_year}) {
 	if (end_year == ""){
 		end_year = "2024"
 	}
-	let seasonality_base = "http://127.0.0.1:8000/get-seasonality/"
 	
-	console.log(ticker)
-
-	let seasonality_url = seasonality_base + ticker
+	let seasonality_url = `http://127.0.0.1:8000/get-seasonality/${ticker}/?start=${start_year}&end=${end_year}`
 	console.log(seasonality_url)
 
 		const [seasonality_data,setData1]=useState([]);
@@ -84,9 +76,8 @@ export function MainChart({ticker,start_year, end_year}) {
 			getData1()
 		},[])
 
-		let volume_base = "http://127.0.0.1:8000/volume/"
+		let volume_url = `http://127.0.0.1:8000/volume/${ticker}/?start=${start_year}&end=${end_year}`
 		
-		let volume_url = volume_base + ticker
 
 			const [volume_data,setData2]=useState([]);
 			const getData2=()=>{

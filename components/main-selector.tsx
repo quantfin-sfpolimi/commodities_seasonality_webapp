@@ -20,13 +20,20 @@ import { Calendar as CalendarIcon, Check, ChevronsUpDown } from 'lucide-react';
 import * as React from 'react';
 import { MainChart } from '@/components/main-areachart';
 
+import { tickers } from './tickers';
+
 const seasonalityAssets = [
 	{ value: 'AAPL', label: 'Apple' },
 	{ value: 'TLSA', label: 'Tesla' },
 	{ value: 'CORN', label: 'Corn' },
+	{ value: 'MSFT', label: 'Microsoft' },
+	{ value: 'NVDA', label: 'Nvidia' },
+	{ value: 'GOLD', label: 'Gold' },
+	{ value: 'BTC-USD', label: 'Bitcoin Shit' },
+	{ value: 'GM', label: 'General Motors' },
+
 	
 ];
-
 
 export function AssetSelectorForm() {
 	const currentYear = new Date().getFullYear();
@@ -77,10 +84,10 @@ export function AssetSelectorForm() {
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedAsset(event.target.value);
-	console.log("cambiato!")
   };
 
   const handleSubmit = () => {
+	console.log(selectedAsset, yearRange);
     setShowChart(true);
 	setChartKey(prevKey => prevKey + 1); // Aggiorna il key per forzare il ri-render
     // Aggiorna il parametro aggiuntivo o altri dati se necessario
