@@ -7,8 +7,6 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart, Line } fro
 import { Tooltip, Legend } from 'recharts';
 import {AssetSelectorForm} from '@/components/main-selector';
 
-
-
 const data = [
 	{ name: '2024-01-01', seasonality: 4000, 1: 2400, 2: 2400, 3: 100, 4 : 100, 5 : 100, volume : 50 },
 	{ name: '2024-01-01', seasonality: 5000, 1: 2600, 2: 2100, 3: 30, 4: 800, 5: 90, volume: 10 },
@@ -53,11 +51,20 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-export function MainChart() {
-	
+export function MainChart({ticker,start_year, end_year}) {
+
+	if(ticker == ""){
+		ticker = "AAPL"
+	}
+	if (start_year == ""){
+		start_year = "2019"
+	}	
+	if (end_year == ""){
+		end_year = "2024"
+	}
 	let seasonality_base = "http://127.0.0.1:8000/get-seasonality/"
 	
-	const ticker = "AAPL"
+	console.log(ticker)
 
 	let seasonality_url = seasonality_base + ticker
 	console.log(seasonality_url)
@@ -100,36 +107,12 @@ export function MainChart() {
 	//------------------------------------------------------
 	const [timeRange, setTimeRange] = React.useState('90d');
 
-	const seasonality = seasonality_data.filter((item) => {
-		const date = new Date(item.date);
-		const referenceDate = new Date('2024-06-30');
-		let daysToSubtract = 90;
-		if (timeRange === '30d') {
-			daysToSubtract = 30;
-		} else if (timeRange === '7d') {
-			daysToSubtract = 7;
-		}
-		const startDate = new Date(referenceDate);
-		startDate.setDate(startDate.getDate() - daysToSubtract);
-		return date >= startDate;
-	});
+	const seasonality = seasonality_data
 
-	const volume = volume_data.filter((item) => {
-		const date = new Date(item.date);
-		const referenceDate = new Date('2024-06-30');
-		let daysToSubtract = 90;
-		if (timeRange === '30d') {
-			daysToSubtract = 30;
-		} else if (timeRange === '7d') {
-			daysToSubtract = 7;
-		}
-		const startDate = new Date(referenceDate);
-		startDate.setDate(startDate.getDate() - daysToSubtract);
-		return date >= startDate;
-	});
+	const volume = volume_data
 	
 	return (
-		<Card>
+		<Card id="ciao">
 			<CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
 				<div className="grid flex-1 gap-1 text-center sm:text-left">
 					<CardTitle>Seasonality Chart</CardTitle>

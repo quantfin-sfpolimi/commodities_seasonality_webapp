@@ -1,4 +1,5 @@
 'use client';
+import {useState,useEffect} from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,17 +18,15 @@ import {
 import { cn } from '@/lib/utils';
 import { Calendar as CalendarIcon, Check, ChevronsUpDown } from 'lucide-react';
 import * as React from 'react';
+import { MainChart } from '@/components/main-areachart';
 
 const seasonalityAssets = [
-	{ value: 'sp500', label: 'S&P 500' },
-	{ value: 'nasdaq', label: 'NASDAQ' },
-	{ value: 'dowjones', label: 'Dow Jones' },
-	{ value: 'russell2000', label: 'Russell 2000' },
-	{ value: 'gold', label: 'Gold' },
-	{ value: 'silver', label: 'Silver' },
-	{ value: 'crudeoil', label: 'Crude Oil' },
-	{ value: 'naturalgas', label: 'Natural Gas' },
+	{ value: 'AAPL', label: 'Apple' },
+	{ value: 'TLSA', label: 'Tesla' },
+	{ value: 'CORN', label: 'Corn' },
+	
 ];
+
 
 export function AssetSelectorForm() {
 	const currentYear = new Date().getFullYear();
@@ -37,8 +36,8 @@ export function AssetSelectorForm() {
 		from: currentYear - 1,
 		to: currentYear,
 	});
-	const [selectedAsset, setSelectedAsset] = React.useState('');
-	const [popoverOpen, setPopoverOpen] = React.useState(false);
+	let [selectedAsset, setSelectedAsset] = React.useState('');
+	let [popoverOpen, setPopoverOpen] = React.useState(false);
 
 	const handleYearClick = (year: number) => {
 		if (!yearRange || (yearRange && yearRange.to)) {
@@ -49,6 +48,7 @@ export function AssetSelectorForm() {
 			);
 		}
 	};
+
 
 	const renderYears = () => {
 		const years = Array.from({ length: 20 }, (_, i) => currentYear - 19 + i);
@@ -72,19 +72,26 @@ export function AssetSelectorForm() {
 		);
 	};
 
-	const handleSubmit = () => {
-		if (selectedAsset && yearRange) {
-			console.log('Selected Asset:', selectedAsset);
-			console.log('Selected Year Range:', yearRange);
-			// graph update logic
-		} else {
-			alert('Please select both an asset and a year range.');
-		}
-	};
+	let [showChart, setShowChart] = useState<boolean>(false);
+	let [chartKey, setChartKey] = useState<number>(0); // Stato per forzare il ri-render
+
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAsset(event.target.value);
+	console.log("cambiato!")
+  };
+
+  const handleSubmit = () => {
+    setShowChart(true);
+	setChartKey(prevKey => prevKey + 1); // Aggiorna il key per forzare il ri-render
+    // Aggiorna il parametro aggiuntivo o altri dati se necessario
+    
+  };
+	
 
 	return (
-		<div className="flex items-center gap-8">
-			<div>
+		<div id = "prova3" >
+			<div id="asset selector" className = "flex h-16 shrink-0 justify-between items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+			<div className='flex'>
 				<Popover>
 					<PopoverTrigger asChild>
 						<Button
@@ -112,6 +119,8 @@ export function AssetSelectorForm() {
 										<CommandItem
 											key={asset.value}
 											value={asset.value}
+											
+
 											onSelect={(currentValue) => {
 												setSelectedAsset(
 													currentValue === selectedAsset ? '' : currentValue
@@ -167,6 +176,8 @@ export function AssetSelectorForm() {
 				</Popover>
 			</div>
 			<Button onClick={handleSubmit}>Submit</Button>
+			</div>
+			{showChart && <MainChart key={chartKey} ticker = {selectedAsset} start_year = {yearRange.from} end_year = { yearRange.to} />}
 		</div>
 	);
 }
