@@ -1,21 +1,20 @@
 
-## Getting Started: React
+## Getting Started: 
 
-First, run the development server:
-
-```bash
-npm run dev
-
-```
-## Getting Started: FastApi
-
-In a separated terminal:
+First, run the server:
 
 ```bash
 fastapi run backend.py
+
+```
+
+In another terminal, run React:
+
+```bash
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
+Have fun!
 
 
