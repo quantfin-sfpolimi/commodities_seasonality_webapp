@@ -29,7 +29,6 @@ const seasonalityAssets = [
 	{ value: 'MSFT', label: 'Microsoft' },
 	{ value: 'NVDA', label: 'Nvidia' },
 	{ value: 'GOLD', label: 'Gold' },
-	{ value: 'BTC-USD', label: 'Bitcoin Shit' },
 	{ value: 'GM', label: 'General Motors' },
 
 	
