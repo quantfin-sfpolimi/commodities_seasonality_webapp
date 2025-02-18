@@ -20,6 +20,7 @@ asset_dropdown =  dcc.Dropdown(options=[{'label': asset.get("name"), 'value': as
 
 date_range_picker = dcc.DatePickerRange(
         id='date-range',
+        display_format="YYYY",
         className = "date-range",
         min_date_allowed=date(1995, 8, 5),
         max_date_allowed= dt.datetime.today(),

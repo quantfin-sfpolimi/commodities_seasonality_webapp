@@ -106,3 +106,8 @@ H4{
 a{
     color: black;
 }
+
+.DateRangePicker_picker{
+    display: none !important;
+
+}
