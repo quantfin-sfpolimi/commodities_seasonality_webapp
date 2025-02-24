@@ -22,6 +22,7 @@ def download_data(start, end, ticker):
   historical = yf.download(ticker, start, end)
   df_stock["Close"] = historical["Close"]
   df_stock["Volume"] = historical["Volume"]
+  print(df_stock)
   df_stock["Year"] = df_stock.index.year
   df_stock.index = df_stock.index.strftime("%Y-%m-%d")
 
